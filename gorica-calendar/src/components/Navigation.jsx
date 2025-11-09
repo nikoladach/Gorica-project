@@ -1,17 +1,20 @@
 import { useAppStore } from '../store/useAppStore';
 import { addDays, subDays, addWeeks, subWeeks, addMonths, subMonths } from 'date-fns';
-import { formatDateDisplay, formatDate } from '../utils/timeSlots';
+import { formatDateDisplay, formatDate, formatDateInput, parseDateInput } from '../utils/timeSlots';
 import { useTranslation } from '../i18n/translations';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export default function Navigation() {
   const { currentView, setCurrentView, currentDate, setCurrentDate, goToToday } = useAppStore();
   const { t } = useTranslation();
-  const [dateInputValue, setDateInputValue] = useState(formatDate(currentDate));
+  const [dateInputValue, setDateInputValue] = useState(formatDateInput(currentDate));
+  const [dateInputValueISO, setDateInputValueISO] = useState(formatDate(currentDate));
+  const hiddenDateInputRef = useRef(null);
 
   // Sync input value when currentDate changes from outside (e.g., "Today" button)
   useEffect(() => {
-    setDateInputValue(formatDate(currentDate));
+    setDateInputValue(formatDateInput(currentDate));
+    setDateInputValueISO(formatDate(currentDate));
   }, [currentDate]);
 
   const navigateDate = (direction) => {
@@ -30,7 +33,8 @@ export default function Navigation() {
         newDate = currentDate;
     }
     setCurrentDate(newDate);
-    setDateInputValue(formatDate(newDate));
+    setDateInputValue(formatDateInput(newDate));
+    setDateInputValueISO(formatDate(newDate));
   };
 
   return (
@@ -66,23 +70,49 @@ export default function Navigation() {
               >
                 ←
               </button>
-              <input
-                type="date"
-                value={dateInputValue}
-                onChange={(e) => {
-                  const inputValue = e.target.value;
-                  setDateInputValue(inputValue);
-                  
-                  // Date input returns YYYY-MM-DD format, parse it directly
-                  if (inputValue) {
-                    const parsedDate = new Date(inputValue);
-                    if (!isNaN(parsedDate.getTime())) {
-                      setCurrentDate(parsedDate);
+              <div className="relative flex items-center">
+                <input
+                  type="text"
+                  value={dateInputValue}
+                  placeholder="ДД/ММ/ГГГГ"
+                  readOnly
+                  onClick={() => {
+                    // When text input is clicked, trigger the hidden date input
+                    if (hiddenDateInputRef.current) {
+                      hiddenDateInputRef.current.showPicker?.() || hiddenDateInputRef.current.click();
                     }
-                  }
-                }}
-                className="px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent w-32 sm:w-40 text-sm"
-              />
+                  }}
+                  className="px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent w-24 sm:w-32 text-sm cursor-pointer"
+                />
+                <input
+                  ref={hiddenDateInputRef}
+                  type="date"
+                  value={dateInputValueISO}
+                  onChange={(e) => {
+                    const inputValue = e.target.value;
+                    setDateInputValueISO(inputValue);
+                    
+                    // Date input returns YYYY-MM-DD format, parse it directly
+                    if (inputValue) {
+                      const parsedDate = new Date(inputValue);
+                      if (!isNaN(parsedDate.getTime())) {
+                        setCurrentDate(parsedDate);
+                        setDateInputValue(formatDateInput(parsedDate));
+                      }
+                    }
+                  }}
+                  className="absolute opacity-0 pointer-events-none w-0 h-0"
+                  style={{ position: 'absolute', left: '-9999px' }}
+                />
+                <svg
+                  className="absolute right-2 sm:right-3 w-4 h-4 text-gray-400 pointer-events-none"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
               <button
                 onClick={() => navigateDate('next')}
                 className="
