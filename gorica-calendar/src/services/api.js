@@ -65,35 +65,31 @@ export const authAPI = {
     const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: getHeaders(false),
-      credentials: 'include', // Include cookies
+      credentials: 'include',
       body: JSON.stringify({ username, password }),
     });
     const data = await handleResponse(response);
-    if (data.token) {
-      tokenManager.setToken(data.token);
-    }
+    if (data.token) tokenManager.setToken(data.token);
     return data;
   },
 
-  // Register (optional, for admin use)
+  // Register
   register: async (username, password, name, role = 'doctor') => {
-    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
       method: 'POST',
       headers: getHeaders(false),
       credentials: 'include',
       body: JSON.stringify({ username, password, name, role }),
     });
     const data = await handleResponse(response);
-    if (data.token) {
-      tokenManager.setToken(data.token);
-    }
+    if (data.token) tokenManager.setToken(data.token);
     return data;
   },
 
   // Logout
   logout: async () => {
     try {
-      await fetch(`${API_BASE_URL}/auth/logout`, {
+      await fetch(`${API_BASE_URL}/api/auth/logout`, {
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include',
@@ -105,9 +101,9 @@ export const authAPI = {
     }
   },
 
-  // Verify token and get current user
+  // Verify token
   verify: async () => {
-    const response = await fetch(`${API_BASE_URL}/auth/verify`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/verify`, {
       method: 'GET',
       headers: getHeaders(),
       credentials: 'include',
@@ -117,7 +113,7 @@ export const authAPI = {
 
   // Get current user info
   getMe: async () => {
-    const response = await fetch(`${API_BASE_URL}/auth/me`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
       method: 'GET',
       headers: getHeaders(),
       credentials: 'include',
@@ -125,6 +121,7 @@ export const authAPI = {
     return handleResponse(response);
   },
 };
+
 
 // Patients API
 export const patientsAPI = {
