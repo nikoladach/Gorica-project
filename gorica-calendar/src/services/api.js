@@ -128,8 +128,8 @@ export const patientsAPI = {
   // Get all patients with optional search
   getAll: async (search = '') => {
     const url = search 
-      ? `${API_BASE_URL}/patients?search=${encodeURIComponent(search)}`
-      : `${API_BASE_URL}/patients`;
+      ? `${API_BASE_URL}/api/patients?search=${encodeURIComponent(search)}`
+      : `${API_BASE_URL}/api/patients`;
     const response = await fetch(url, {
       headers: getHeaders(),
       credentials: 'include',
@@ -139,7 +139,7 @@ export const patientsAPI = {
 
   // Get single patient by ID
   getById: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/patients/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/patients/${id}`, {
       headers: getHeaders(),
       credentials: 'include',
     });
@@ -191,7 +191,7 @@ export const appointmentsAPI = {
     if (filters.status) params.append('status', filters.status);
     if (filters.service_type) params.append('service_type', filters.service_type);
 
-    const url = `${API_BASE_URL}/appointments${params.toString() ? '?' + params.toString() : ''}`;
+    const url = `${API_BASE_URL}/api/appointments${params.toString() ? '?' + params.toString() : ''}`;
     const response = await fetch(url, {
       headers: getHeaders(),
       credentials: 'include',
