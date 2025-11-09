@@ -2,6 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
 import patientsRouter from './routes/patients.js';
 import appointmentsRouter from './routes/appointments.js';
 import authRouter from './routes/auth.js';
@@ -14,28 +17,30 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// --- Setup paths for static frontend ---
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // Middleware - CORS configuration
-// Allow all localhost origins in development, specific origins in production
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-    
-    // In development, allow all localhost and 127.0.0.1 origins
+
     if (process.env.NODE_ENV !== 'production') {
-      if (origin.startsWith('http://localhost:') || 
-          origin.startsWith('http://127.0.0.1:') ||
-          origin.startsWith('https://localhost:') ||
-          origin.startsWith('https://127.0.0.1:')) {
+      if (
+        origin.startsWith('http://localhost:') ||
+        origin.startsWith('http://127.0.0.1:') ||
+        origin.startsWith('https://localhost:') ||
+        origin.startsWith('https://127.0.0.1:')
+      ) {
         return callback(null, true);
       }
     }
-    
-    // In production, use the configured frontend URL(s)
-    const allowedOrigins = process.env.FRONTEND_URL 
+
+    const allowedOrigins = process.env.FRONTEND_URL
       ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
       : ['http://localhost:5173', 'http://localhost:5174'];
-    
+
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -51,45 +56,60 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Health check endpoint
+// --- Health check endpoint ---
 app.get('/health', async (req, res) => {
   try {
-    // Test database connection
     await query('SELECT NOW()');
-    res.json({ 
-      status: 'healthy', 
+    res.json({
+      status: 'healthy',
       database: 'connected',
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    res.status(503).json({ 
-      status: 'unhealthy', 
+    res.status(503).json({
+      status: 'unhealthy',
       database: 'disconnected',
-      error: error.message 
+      error: error.message
     });
   }
 });
 
-// Public API Routes (no authentication required)
+// --- Public API Routes ---
 app.use('/api/auth', authRouter);
 
-// Protected API Routes (authentication required)
+// --- Protected API Routes ---
 app.use('/api/patients', authenticateToken, patientsRouter);
 app.use('/api/appointments', authenticateToken, appointmentsRouter);
 app.use('/api/reports', authenticateToken, reportsRouter);
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ error: 'Route not found' });
+// --- Serve Frontend Build ---
+const frontendPath = path.join(__dirname, '../gorica-calendar/dist');
+app.use(express.static(frontendPath));
+
+// --- Fallback for SPA routing ---
+app.get('*', (req, res, next) => {
+  if (req.originalUrl.startsWith('/api') || req.originalUrl.startsWith('/health')) {
+    return next(); // skip for API routes
+  }
+  res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
-// Error handler
+// --- 404 handler (for APIs only) ---
+app.use((req, res) => {
+  if (req.originalUrl.startsWith('/api')) {
+    res.status(404).json({ error: 'Route not found' });
+  } else {
+    res.sendFile(path.join(frontendPath, 'index.html'));
+  }
+});
+
+// --- Error handler ---
 app.use((err, req, res, next) => {
   console.error('Server error:', err);
   res.status(500).json({ error: 'Internal server error' });
 });
 
-// Start server
+// --- Start server ---
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/health`);
@@ -97,5 +117,5 @@ app.listen(PORT, () => {
   console.log(`👥 Patients API: http://localhost:${PORT}/api/patients (protected)`);
   console.log(`📅 Appointments API: http://localhost:${PORT}/api/appointments (protected)`);
   console.log(`📋 Reports API: http://localhost:${PORT}/api/reports (protected)`);
+  console.log(`🖥️ Serving frontend from: ${frontendPath}`);
 });
-
