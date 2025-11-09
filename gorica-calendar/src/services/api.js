@@ -201,7 +201,7 @@ export const appointmentsAPI = {
 
   // Get single appointment by ID
   getById: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/appointments/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/appointments/${id}`, {
       headers: getHeaders(),
       credentials: 'include',
     });
@@ -210,7 +210,7 @@ export const appointmentsAPI = {
 
   // Create new appointment
   create: async (appointmentData) => {
-    const response = await fetch(`${API_BASE_URL}/appointments`, {
+    const response = await fetch(`${API_BASE_URL}/api/appointments`, {
       method: 'POST',
       headers: getHeaders(),
       credentials: 'include',
@@ -221,7 +221,7 @@ export const appointmentsAPI = {
 
   // Update appointment
   update: async (id, appointmentData) => {
-    const response = await fetch(`${API_BASE_URL}/appointments/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/appointments/${id}`, {
       method: 'PUT',
       headers: getHeaders(),
       credentials: 'include',
@@ -232,7 +232,7 @@ export const appointmentsAPI = {
 
   // Delete/cancel appointment
   delete: async (id, hardDelete = false) => {
-    const url = `${API_BASE_URL}/appointments/${id}${hardDelete ? '?hard_delete=true' : ''}`;
+    const url = `${API_BASE_URL}/api/appointments/${id}${hardDelete ? '?hard_delete=true' : ''}`;
     const response = await fetch(url, {
       method: 'DELETE',
       headers: getHeaders(),
