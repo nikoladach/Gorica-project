@@ -224,59 +224,68 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="p-3 md:p-4">
-          <div className="flex flex-col gap-3 md:gap-4">
-            {/* Top row: Title and user info */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                <h1 className="text-xl sm:text-2xl font-bold text-primary">
-                  {selectedMode === 'doctor' ? `🏥 ${t('header.doctorScheduler')}` : `💆 ${t('header.estheticianScheduler')}`}
-                </h1>
-                <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
-                  <span className="hidden sm:inline">{t('auth.loggedInAs')}</span>
-                  <span className="font-semibold text-primary">{user?.name || user?.username}</span>
-                  <span className="px-2 py-1 bg-primary-light text-primary rounded text-xs">
-                    {selectedMode === 'doctor' ? t('auth.doctor') : t('auth.esthetician')}
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 sm:gap-4">
-                <ShiftToggle />
-                <button
-                  onClick={logout}
-                  className="px-3 md:px-4 py-2 text-xs sm:text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  {t('auth.logout')}
-                </button>
+      {/* Header - Mobile Optimized */}
+      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-20">
+        <div className="p-2 sm:p-3 md:p-4">
+          {/* Top row: Title and Hamburger (mobile) / Full controls (desktop) */}
+          <div className="flex items-center justify-between gap-2 mb-2 sm:mb-0">
+            {/* Left: Title and User Info */}
+            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+              <h1 className="text-base sm:text-xl md:text-2xl font-bold text-primary truncate">
+                {selectedMode === 'doctor' ? `🏥 ${t('header.doctorScheduler')}` : `💆 ${t('header.estheticianScheduler')}`}
+              </h1>
+              {/* User info - hidden on very small screens, shown on sm+ */}
+              <div className="hidden sm:flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+                <span className="hidden md:inline">{t('auth.loggedInAs')}</span>
+                <span className="font-semibold text-primary truncate">{user?.name || user?.username}</span>
+                <span className="px-2 py-1 bg-primary-light text-primary rounded text-xs whitespace-nowrap">
+                  {selectedMode === 'doctor' ? t('auth.doctor') : t('auth.esthetician')}
+                </span>
               </div>
             </div>
-            {/* Bottom row: Search */}
-            <div className="flex items-center gap-2">
-              <div className="relative flex-1">
-                <input
-                  type="text"
-                  value={globalSearchQuery}
-                  onChange={(e) => setGlobalSearchQuery(e.target.value)}
-                  placeholder={t('header.searchPatientName')}
-                  className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-                />
-                <svg
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-              </div>
+
+            {/* Right: Controls */}
+            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+              <ShiftToggle />
+              <button
+                onClick={logout}
+                className="px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors whitespace-nowrap"
+              >
+                {t('auth.logout')}
+              </button>
             </div>
+          </div>
+
+          {/* Second row: User info (mobile only) */}
+          <div className="sm:hidden flex items-center gap-2 text-xs text-gray-600 mb-2">
+            <span className="font-semibold text-primary">{user?.name || user?.username}</span>
+            <span className="px-2 py-0.5 bg-primary-light text-primary rounded text-xs">
+              {selectedMode === 'doctor' ? t('auth.doctor') : t('auth.esthetician')}
+            </span>
+          </div>
+
+          {/* Search Bar - Full width, prominent */}
+          <div className="relative">
+            <input
+              type="text"
+              value={globalSearchQuery}
+              onChange={(e) => setGlobalSearchQuery(e.target.value)}
+              placeholder={t('header.searchPatientName')}
+              className="w-full px-3 sm:px-4 py-2 pl-9 sm:pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+            />
+            <svg
+              className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
           </div>
         </div>
       </header>
