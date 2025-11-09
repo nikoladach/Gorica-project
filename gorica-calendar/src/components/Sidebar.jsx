@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import { formatDate, formatTime } from '../utils/timeSlots';
 import { format } from 'date-fns';
@@ -8,7 +8,13 @@ import { useTranslation } from '../i18n/translations';
 export default function Sidebar() {
   const { appointments, currentDate, selectedMode } = useAppStore();
   const { t } = useTranslation();
-  const [isOpen, setIsOpen] = useState(true);
+  // Sidebar should be closed by default on mobile, open on desktop
+  const [isOpen, setIsOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 768; // md breakpoint
+    }
+    return false;
+  });
   const [filterType, setFilterType] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -34,12 +40,26 @@ export default function Sidebar() {
   const appointmentTypeValues = getAppointmentTypeValues(selectedMode || 'doctor');
   const appointmentTypes = ['all', ...appointmentTypeValues];
 
+  // Update sidebar state when window is resized
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setIsOpen(true); // Open on desktop
+      } else {
+        setIsOpen(false); // Closed on mobile
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
     <>
-      {/* Mobile toggle button */}
+      {/* Mobile toggle button - sticky to top, below modals */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="md:hidden fixed top-20 sm:top-24 right-4 z-20 bg-primary text-white p-2 rounded-lg shadow-lg hover:bg-primary-dark transition-colors"
+        className="md:hidden fixed top-4 right-4 z-30 bg-primary text-white p-2 rounded-lg shadow-lg hover:bg-primary-dark transition-colors"
         aria-label={isOpen ? t('common.close') : t('sidebar.openSidebar')}
       >
         {isOpen ? '✕' : '☰'}
@@ -48,11 +68,11 @@ export default function Sidebar() {
       {/* Sidebar */}
       <div
         className={`
-          fixed md:static inset-y-0 right-0 z-10
+          fixed md:static inset-y-0 right-0 z-40
           w-full sm:w-80 bg-white shadow-lg border-l border-gray-200
           transform transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}
-          pt-20 sm:pt-24 md:pt-4
+          pt-16 sm:pt-16 md:pt-4
         `}
       >
         <div className="p-3 sm:p-4 h-full overflow-y-auto">
@@ -157,10 +177,10 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Overlay for mobile */}
+      {/* Overlay for mobile - below modals */}
       {isOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black/50 z-0"
+          className="md:hidden fixed inset-0 bg-black/50 z-20"
           onClick={() => setIsOpen(false)}
         />
       )}
