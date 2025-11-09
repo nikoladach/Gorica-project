@@ -26,51 +26,32 @@ const frontendPath = path.resolve(__dirname, '../gorica-calendar/dist');
 app.use(express.static(frontendPath));
 
 // --- CORS configuration ---
+const allowedOrigins = [
+  "https://gorica-project.onrender.com", // your frontend on Render
+  "http://localhost:5173",               // local dev
+  "http://127.0.0.1:5173",
+];
+
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow same-origin and requests without origin (e.g. curl)
-    if (!origin || origin === 'https://gorica-project.onrender.com') {
-      return callback(null, true);
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn(`CORS blocked origin: ${origin}`);
+      callback(new Error("Not allowed by CORS"));
     }
-
-    // Allow localhost during development
-    if (process.env.NODE_ENV !== 'production') {
-      if (
-        origin.startsWith('http://localhost:') ||
-        origin.startsWith('http://127.0.0.1:') ||
-        origin.startsWith('https://localhost:') ||
-        origin.startsWith('https://127.0.0.1:')
-      ) {
-        return callback(null, true);
-      }
-    }
-
-    // Allow explicit FRONTEND_URLs from env var
-    const allowedOrigins = process.env.FRONTEND_URL
-      ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
-      : [];
-
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-
-    console.warn(`CORS blocked origin: ${origin}`);
-    callback(new Error('Not allowed by CORS'));
   },
-
   credentials: true,
-
-  // ✅ Add explicit CORS response fields
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  optionsSuccessStatus: 200
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  optionsSuccessStatus: 200, // ensures legacy browsers handle it
 };
 
-// Apply CORS middleware
+// ✅ Apply CORS globally BEFORE routes
 app.use(cors(corsOptions));
 
-// ✅ Handle preflight requests explicitly
-app.options('*', cors(corsOptions));
+// ✅ Explicitly handle all preflight requests
+app.options("*", cors(corsOptions));
 
 app.use(cookieParser());
 app.use(express.json());
@@ -131,4 +112,5 @@ app.listen(PORT, () => {
   console.log(`📋 Reports API: http://localhost:${PORT}/api/reports (protected)`);
   console.log(`🖥️ Serving frontend from: ${frontendPath}`);
 });
+
 
