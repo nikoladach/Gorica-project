@@ -267,6 +267,13 @@ function App() {
 
             {/* Right: Controls */}
             <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+              <ShiftToggle />
+              <button
+                onClick={logout}
+                className="px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors whitespace-nowrap"
+              >
+                {t('auth.logout')}
+              </button>
               {/* Hamburger menu button - mobile only */}
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -274,13 +281,6 @@ function App() {
                 aria-label={sidebarOpen ? t('common.close') : t('sidebar.openSidebar')}
               >
                 {sidebarOpen ? '✕' : '☰'}
-              </button>
-              <ShiftToggle />
-              <button
-                onClick={logout}
-                className="px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors whitespace-nowrap"
-              >
-                {t('auth.logout')}
               </button>
             </div>
           </div>
