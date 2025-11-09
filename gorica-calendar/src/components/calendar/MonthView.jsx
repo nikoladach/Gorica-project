@@ -7,7 +7,7 @@ import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameMonth, isSam
 import AppointmentModal from '../AppointmentModal';
 
 export default function MonthView() {
-  const { currentDate, getFilteredAppointments, selectedMode } = useAppStore();
+  const { currentDate, getFilteredAppointments, selectedMode, setCurrentDate, setCurrentView } = useAppStore();
   const { t } = useTranslation();
   const appointments = getFilteredAppointments();
   const [selectedSlot, setSelectedSlot] = useState(null);
@@ -44,15 +44,19 @@ export default function MonthView() {
   };
 
   const handleCreateNewAppointment = (day) => {
-    // Create a new appointment slot for the selected day at 9 AM
+    // Redirect to day view with the selected day
+    // Set the date to noon to avoid timezone issues
     const dateStr = formatDate(day);
     const [year, month, dayNum] = dateStr.split('-').map(Number);
-    const newSlot = new Date(year, month - 1, dayNum, 9, 0, 0, 0);
+    const newDate = new Date(year, month - 1, dayNum, 12, 0, 0, 0);
     
-    setEditingAppointment(null);
-    setSelectedSlot(newSlot);
+    // Close the day appointments modal
     setIsDayAppointmentsOpen(false);
-    setIsModalOpen(true);
+    setSelectedDay(null);
+    
+    // Set the current date and switch to day view
+    setCurrentDate(newDate);
+    setCurrentView('day');
   };
 
   const handleAppointmentClick = (e, appointment) => {
