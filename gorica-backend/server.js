@@ -20,12 +20,20 @@ const PORT = process.env.PORT || 3001;
 // --- Setup paths for static frontend ---
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const frontendPath = path.resolve(__dirname, '../gorica-calendar/dist');
 
-// Middleware - CORS configuration
+// --- Serve static frontend FIRST ---
+app.use(express.static(frontendPath));
+
+// --- CORS configuration ---
 const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
+    // Allow same-origin and requests without origin (e.g. curl)
+    if (!origin || origin === 'https://gorica-project.onrender.com') {
+      return callback(null, true);
+    }
 
+    // Allow localhost during development
     if (process.env.NODE_ENV !== 'production') {
       if (
         origin.startsWith('http://localhost:') ||
@@ -37,16 +45,17 @@ const corsOptions = {
       }
     }
 
+    // Allow explicit FRONTEND_URLs from env var
     const allowedOrigins = process.env.FRONTEND_URL
       ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
-      : ['http://localhost:5173', 'http://localhost:5174'];
+      : [];
 
     if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.warn(`CORS blocked origin: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
+      return callback(null, true);
     }
+
+    console.warn(`CORS blocked origin: ${origin}`);
+    callback(new Error('Not allowed by CORS'));
   },
   credentials: true
 };
@@ -74,23 +83,15 @@ app.get('/health', async (req, res) => {
   }
 });
 
-// --- Public API Routes ---
+// --- API Routes ---
 app.use('/api/auth', authRouter);
-
-// --- Protected API Routes ---
 app.use('/api/patients', authenticateToken, patientsRouter);
 app.use('/api/appointments', authenticateToken, appointmentsRouter);
 app.use('/api/reports', authenticateToken, reportsRouter);
 
-// --- Serve Frontend Build ---
-const frontendPath = path.join(__dirname, '../gorica-calendar/dist');
-app.use(express.static(frontendPath));
-
 // --- Fallback for SPA routing ---
 app.get('*', (req, res, next) => {
-  if (req.originalUrl.startsWith('/api') || req.originalUrl.startsWith('/health')) {
-    return next(); // skip for API routes
-  }
+  if (req.originalUrl.startsWith('/api') || req.originalUrl.startsWith('/health')) return next();
   res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
