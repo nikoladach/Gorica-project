@@ -5,7 +5,7 @@ import { useTranslation } from '../i18n/translations';
 import { useState, useEffect, useRef } from 'react';
 
 export default function Navigation() {
-  const { currentView, setCurrentView, currentDate, setCurrentDate, goToToday } = useAppStore();
+  const { currentView, setCurrentView, currentDate, setCurrentDate, goToToday, setGlobalSearchQuery } = useAppStore();
   const { t } = useTranslation();
   const [dateInputValue, setDateInputValue] = useState(formatDateInput(currentDate));
   const [dateInputValueISO, setDateInputValueISO] = useState(formatDate(currentDate));
@@ -137,7 +137,10 @@ export default function Navigation() {
         {/* Bottom row: View switcher */}
         <div className="flex items-center gap-1 sm:gap-2 bg-gray-100 rounded-lg p-1">
           <button
-            onClick={() => setCurrentView('day')}
+            onClick={() => {
+              setCurrentView('day');
+              setGlobalSearchQuery(''); // Clear search when switching to calendar view
+            }}
             className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-all ${
               currentView === 'day'
                 ? 'bg-white text-primary shadow-sm'
@@ -147,7 +150,10 @@ export default function Navigation() {
             {t('nav.dayView')}
           </button>
           <button
-            onClick={() => setCurrentView('week')}
+            onClick={() => {
+              setCurrentView('week');
+              setGlobalSearchQuery(''); // Clear search when switching to calendar view
+            }}
             className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-all ${
               currentView === 'week'
                 ? 'bg-white text-primary shadow-sm'
@@ -157,7 +163,10 @@ export default function Navigation() {
             {t('nav.weekView')}
           </button>
           <button
-            onClick={() => setCurrentView('month')}
+            onClick={() => {
+              setCurrentView('month');
+              setGlobalSearchQuery(''); // Clear search when switching to calendar view
+            }}
             className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-all ${
               currentView === 'month'
                 ? 'bg-white text-primary shadow-sm'
