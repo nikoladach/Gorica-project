@@ -25,6 +25,21 @@ export default function PatientReports({ isOpen, onClose, patientId, patientName
     }
   }, [isOpen, patientId]);
 
+  // Prevent body scrolling when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      // Save the current overflow style
+      const originalOverflow = document.body.style.overflow;
+      // Disable scrolling
+      document.body.style.overflow = 'hidden';
+      
+      // Cleanup: restore scrolling when modal closes
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isOpen]);
+
   const loadReports = async () => {
     setLoading(true);
     setError('');
