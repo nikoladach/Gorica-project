@@ -1,6 +1,6 @@
 import { formatDate } from '../utils/timeSlots';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const API_URL = import.meta.env.VITE_API_URL || window.location.origin;
 
 // Token management
 let authToken = null;
