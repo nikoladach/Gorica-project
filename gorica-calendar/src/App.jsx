@@ -267,7 +267,10 @@ function App() {
 
             {/* Right: Controls */}
             <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-              <ShiftToggle />
+              {/* ShiftToggle - hidden on mobile, shown on desktop */}
+              <div className="hidden sm:block">
+                <ShiftToggle />
+              </div>
               <button
                 onClick={logout}
                 className="px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors whitespace-nowrap"
