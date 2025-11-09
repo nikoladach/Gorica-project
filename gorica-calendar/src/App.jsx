@@ -225,7 +225,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header - Mobile Optimized */}
-      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-20">
+      <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="p-2 sm:p-3 md:p-4">
           {/* Top row: Title and Hamburger (mobile) / Full controls (desktop) */}
           <div className="flex items-center justify-between gap-2 mb-2 sm:mb-0">
