@@ -77,20 +77,32 @@ export default function Sidebar() {
       >
         <div className="p-3 sm:p-4 h-full overflow-y-auto">
           <div className="mb-3 sm:mb-4">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
-                {formatDate(currentDate) === formatDate(new Date()) 
-                  ? t('calendar.todaySchedule')
-                  : `${t('calendar.scheduleFor')} ${format(currentDate, 'd MMM yyyy')}`
-                }
-              </h2>
-              <span className={`px-2 py-1 rounded text-xs font-medium self-start ${
-                selectedMode === 'doctor'
-                  ? 'bg-blue-100 text-blue-800'
-                  : 'bg-pink-100 text-pink-800'
-              }`}>
-                {selectedMode === 'doctor' ? t('auth.doctor') : t('auth.esthetician')}
-              </span>
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
+                  {formatDate(currentDate) === formatDate(new Date()) 
+                    ? t('calendar.todaySchedule')
+                    : `${t('calendar.scheduleFor')} ${format(currentDate, 'd MMM yyyy')}`
+                  }
+                </h2>
+                <span className={`px-2 py-1 rounded text-xs font-medium self-start ${
+                  selectedMode === 'doctor'
+                    ? 'bg-blue-100 text-blue-800'
+                    : 'bg-pink-100 text-pink-800'
+                }`}>
+                  {selectedMode === 'doctor' ? t('auth.doctor') : t('auth.esthetician')}
+                </span>
+              </div>
+              {/* Close button - visible on mobile when sidebar is open */}
+              <button
+                onClick={() => setIsOpen(false)}
+                className="md:hidden flex-shrink-0 text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors"
+                aria-label={t('common.close')}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
             <p className="text-xs text-gray-500">
               {selectedMode === 'doctor' 
