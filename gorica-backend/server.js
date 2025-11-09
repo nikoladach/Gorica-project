@@ -17,19 +17,14 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// --- Setup paths for static frontend ---
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const frontendPath = path.resolve(__dirname, '../gorica-calendar/dist');
 
-// --- Serve static frontend FIRST ---
-app.use(express.static(frontendPath));
-
-// --- CORS configuration ---
+// ✅ --- FIXED CORS CONFIGURATION ---
 const allowedOrigins = [
-  "https://gorica-project.onrender.com", // your frontend on Render
-  "http://localhost:5173",               // local dev
-  "http://127.0.0.1:5173",
+  'https://gorica-project.onrender.com', // frontend (Render)
+  'http://localhost:5173',               // dev
+  'http://127.0.0.1:5173'
 ];
 
 const corsOptions = {
@@ -38,79 +33,49 @@ const corsOptions = {
       callback(null, true);
     } else {
       console.warn(`CORS blocked origin: ${origin}`);
-      callback(new Error("Not allowed by CORS"));
+      callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  optionsSuccessStatus: 200, // ensures legacy browsers handle it
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 200
 };
 
-// ✅ Apply CORS globally BEFORE routes
+// ✅ Apply CORS before everything else
 app.use(cors(corsOptions));
 
-// ✅ Explicitly handle all preflight requests
-app.options("*", cors(corsOptions));
+// ✅ Explicitly handle preflight requests
+app.options('*', cors(corsOptions));
 
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// --- Health check endpoint ---
+// ✅ Health check (kept above frontend serving)
 app.get('/health', async (req, res) => {
   try {
     await query('SELECT NOW()');
-    res.json({
-      status: 'healthy',
-      database: 'connected',
-      timestamp: new Date().toISOString()
-    });
+    res.json({ status: 'healthy', database: 'connected', timestamp: new Date().toISOString() });
   } catch (error) {
-    res.status(503).json({
-      status: 'unhealthy',
-      database: 'disconnected',
-      error: error.message
-    });
+    res.status(503).json({ status: 'unhealthy', database: 'disconnected', error: error.message });
   }
 });
 
-// --- API Routes ---
+// ✅ API routes (make sure these exist)
 app.use('/api/auth', authRouter);
 app.use('/api/patients', authenticateToken, patientsRouter);
 app.use('/api/appointments', authenticateToken, appointmentsRouter);
 app.use('/api/reports', authenticateToken, reportsRouter);
 
-// --- Fallback for SPA routing ---
-app.get('*', (req, res, next) => {
-  if (req.originalUrl.startsWith('/api') || req.originalUrl.startsWith('/health')) return next();
+// ✅ Serve frontend AFTER APIs
+const frontendPath = path.join(__dirname, '../gorica-calendar/dist');
+app.use(express.static(frontendPath));
+app.get('*', (req, res) => {
   res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
-// --- 404 handler (for APIs only) ---
-app.use((req, res) => {
-  if (req.originalUrl.startsWith('/api')) {
-    res.status(404).json({ error: 'Route not found' });
-  } else {
-    res.sendFile(path.join(frontendPath, 'index.html'));
-  }
-});
-
-// --- Error handler ---
-app.use((err, req, res, next) => {
-  console.error('Server error:', err);
-  res.status(500).json({ error: 'Internal server error' });
-});
-
-// --- Start server ---
+// ✅ Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📊 Health check: http://localhost:${PORT}/health`);
-  console.log(`🔐 Auth API: http://localhost:${PORT}/api/auth`);
-  console.log(`👥 Patients API: http://localhost:${PORT}/api/patients (protected)`);
-  console.log(`📅 Appointments API: http://localhost:${PORT}/api/appointments (protected)`);
-  console.log(`📋 Reports API: http://localhost:${PORT}/api/reports (protected)`);
-  console.log(`🖥️ Serving frontend from: ${frontendPath}`);
 });
-
-
