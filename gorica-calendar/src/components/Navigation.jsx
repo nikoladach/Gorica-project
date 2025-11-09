@@ -76,13 +76,7 @@ export default function Navigation() {
                   value={dateInputValue}
                   placeholder="ДД/ММ/ГГГГ"
                   readOnly
-                  onClick={() => {
-                    // When text input is clicked, trigger the hidden date input
-                    if (hiddenDateInputRef.current) {
-                      hiddenDateInputRef.current.showPicker?.() || hiddenDateInputRef.current.click();
-                    }
-                  }}
-                  className="px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent w-24 sm:w-32 text-sm cursor-pointer"
+                  className="px-2 sm:px-3 py-2 pr-8 sm:pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent w-24 sm:w-32 text-sm cursor-pointer pointer-events-none"
                 />
                 <input
                   ref={hiddenDateInputRef}
@@ -101,11 +95,11 @@ export default function Navigation() {
                       }
                     }
                   }}
-                  className="absolute opacity-0 pointer-events-none w-0 h-0"
-                  style={{ position: 'absolute', left: '-9999px' }}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  style={{ zIndex: 1 }}
                 />
                 <svg
-                  className="absolute right-2 sm:right-3 w-4 h-4 text-gray-400 pointer-events-none"
+                  className="absolute right-2 sm:right-3 w-4 h-4 text-gray-400 pointer-events-none z-10"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
