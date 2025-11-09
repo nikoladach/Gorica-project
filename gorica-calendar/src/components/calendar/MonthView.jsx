@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAppStore } from '../../store/useAppStore';
-import { formatDate } from '../../utils/timeSlots';
+import { formatDate, formatTime, formatDateDisplay } from '../../utils/timeSlots';
 import { getAppointmentTypeLabel } from '../../utils/appointmentTypes';
 import { useTranslation } from '../../i18n/translations';
 import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameMonth, isSameDay, startOfWeek, addDays } from 'date-fns';
@@ -13,6 +13,8 @@ export default function MonthView() {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState(null);
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [isDayAppointmentsOpen, setIsDayAppointmentsOpen] = useState(false);
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -36,48 +38,20 @@ export default function MonthView() {
   };
 
   const handleDayClick = (day) => {
-    // Always create a new appointment slot for the clicked day at 9 AM
-    // This allows creating new appointments even if the day already has appointments
-    // Use formatDate to get the date string, then parse it to avoid timezone issues
-    const dateStr = formatDate(day); // Returns "YYYY-MM-DD" format
+    // Show all appointments for the clicked day in a modal
+    setSelectedDay(day);
+    setIsDayAppointmentsOpen(true);
+  };
+
+  const handleCreateNewAppointment = (day) => {
+    // Create a new appointment slot for the selected day at 9 AM
+    const dateStr = formatDate(day);
     const [year, month, dayNum] = dateStr.split('-').map(Number);
-    
-    // Create date using local time components - this ensures no timezone conversion
-    // Use noon (12:00) as the base time to avoid any midnight timezone edge cases
-    // Then we'll set it to 9 AM after creation
     const newSlot = new Date(year, month - 1, dayNum, 9, 0, 0, 0);
-    
-    // Verify the date is correct by formatting it again
-    const verifyDateStr = formatDate(newSlot);
-    
-    console.log('MonthView - Creating slot for day:', {
-      clickedDay: day.toISOString(),
-      clickedDayLocal: dateStr,
-      dateStr,
-      parsed: { year, month: month - 1, dayNum },
-      newSlot: newSlot.toISOString(),
-      newSlotLocal: verifyDateStr,
-      newSlotComponents: {
-        year: newSlot.getFullYear(),
-        month: newSlot.getMonth() + 1,
-        date: newSlot.getDate(),
-        hours: newSlot.getHours()
-      },
-      dateMatch: dateStr === verifyDateStr
-    });
-    
-    // Double-check: if dates don't match, log a warning
-    if (dateStr !== verifyDateStr) {
-      console.error('⚠️ DATE MISMATCH!', {
-        expected: dateStr,
-        actual: verifyDateStr,
-        clickedDay: day,
-        newSlot: newSlot
-      });
-    }
     
     setEditingAppointment(null);
     setSelectedSlot(newSlot);
+    setIsDayAppointmentsOpen(false);
     setIsModalOpen(true);
   };
 
@@ -87,6 +61,15 @@ export default function MonthView() {
     // Open modal to edit the clicked appointment
     setEditingAppointment(appointment);
     setSelectedSlot(appointment.time);
+    setIsDayAppointmentsOpen(false);
+    setIsModalOpen(true);
+  };
+
+  const handleDayAppointmentCardClick = (appointment) => {
+    // Open modal to edit the clicked appointment from the day appointments modal
+    setEditingAppointment(appointment);
+    setSelectedSlot(appointment.time);
+    setIsDayAppointmentsOpen(false);
     setIsModalOpen(true);
   };
 
@@ -173,6 +156,123 @@ export default function MonthView() {
           </div>
         </div>
       </div>
+
+      {/* Day Appointments Modal */}
+      {selectedDay && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4 overflow-y-auto"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setIsDayAppointmentsOpen(false);
+              setSelectedDay(null);
+            }
+          }}
+        >
+          <div
+            className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex justify-between items-center p-4 sm:p-6 border-b border-gray-200">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-semibold text-gray-800">
+                  {formatDateDisplay(selectedDay, t)}
+                </h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  {getDayAppointments(selectedDay).length} {getDayAppointments(selectedDay).length !== 1 ? t('appointments.appointments') : t('appointments.appointment')}
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setIsDayAppointmentsOpen(false);
+                  setSelectedDay(null);
+                }}
+                className="text-gray-400 hover:text-gray-600 text-2xl sm:text-3xl leading-none p-1"
+                aria-label={t('common.close')}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Scrollable Appointments List */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+              {getDayAppointments(selectedDay).length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-500 text-lg mb-4">{t('appointments.noAppointments')}</p>
+                  <button
+                    onClick={() => handleCreateNewAppointment(selectedDay)}
+                    className="btn-primary"
+                  >
+                    {t('appointments.newAppointment')}
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {getDayAppointments(selectedDay)
+                    .sort((a, b) => {
+                      const dateA = a.time instanceof Date ? a.time : new Date(a.time);
+                      const dateB = b.time instanceof Date ? b.time : new Date(b.time);
+                      return dateA - dateB;
+                    })
+                    .map((apt) => (
+                      <div
+                        key={apt.id}
+                        onClick={() => handleDayAppointmentCardClick(apt)}
+                        className="bg-white rounded-lg shadow-md border border-gray-200 p-4 sm:p-5 hover:shadow-lg transition-shadow cursor-pointer"
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-0 mb-3">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-1 truncate">
+                              {apt.patientName}
+                            </h3>
+                            <p className="text-xs sm:text-sm text-gray-600 mb-2">
+                              {getAppointmentTypeLabel(apt.appointmentType, selectedMode || 'doctor')}
+                            </p>
+                          </div>
+                          <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium self-start sm:self-auto whitespace-nowrap ${
+                            apt.status === 'completed' 
+                              ? 'bg-green-100 text-green-800'
+                              : apt.status === 'cancelled'
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-blue-100 text-blue-800'
+                          }`}>
+                            {t(`status.${apt.status}`) || apt.status}
+                          </span>
+                        </div>
+
+                        <div className="space-y-2 mb-3">
+                          <div className="flex items-center text-sm text-gray-600">
+                            <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {formatTime(apt.time)}
+                          </div>
+                          {apt.notes && (
+                            <div className="text-sm text-gray-600">
+                              <p className="line-clamp-2">{apt.notes}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+
+            {/* Footer with Create New Button */}
+            {getDayAppointments(selectedDay).length > 0 && (
+              <div className="p-4 sm:p-6 border-t border-gray-200">
+                <button
+                  onClick={() => handleCreateNewAppointment(selectedDay)}
+                  className="btn-primary w-full"
+                >
+                  {t('appointments.newAppointment')}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <AppointmentModal
         isOpen={isModalOpen}
