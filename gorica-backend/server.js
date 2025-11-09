@@ -57,10 +57,21 @@ const corsOptions = {
     console.warn(`CORS blocked origin: ${origin}`);
     callback(new Error('Not allowed by CORS'));
   },
-  credentials: true
+
+  credentials: true,
+
+  // ✅ Add explicit CORS response fields
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 200
 };
 
+// Apply CORS middleware
 app.use(cors(corsOptions));
+
+// ✅ Handle preflight requests explicitly
+app.options('*', cors(corsOptions));
+
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -120,3 +131,4 @@ app.listen(PORT, () => {
   console.log(`📋 Reports API: http://localhost:${PORT}/api/reports (protected)`);
   console.log(`🖥️ Serving frontend from: ${frontendPath}`);
 });
+
