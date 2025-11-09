@@ -148,7 +148,7 @@ export const patientsAPI = {
 
   // Create new patient
   create: async (patientData) => {
-    const response = await fetch(`${API_BASE_URL}/patients`, {
+    const response = await fetch(`${API_BASE_URL}/api/patients`, {
       method: 'POST',
       headers: getHeaders(),
       credentials: 'include',
@@ -159,7 +159,7 @@ export const patientsAPI = {
 
   // Update patient
   update: async (id, patientData) => {
-    const response = await fetch(`${API_BASE_URL}/patients/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/patients/${id}`, {
       method: 'PUT',
       headers: getHeaders(),
       credentials: 'include',
@@ -170,7 +170,7 @@ export const patientsAPI = {
 
   // Delete patient
   delete: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/patients/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/patients/${id}`, {
       method: 'DELETE',
       headers: getHeaders(),
       credentials: 'include',
@@ -268,7 +268,7 @@ export const reportsAPI = {
 
   // Get report by appointment ID
   getByAppointmentId: async (appointmentId) => {
-    const response = await fetch(`${API_BASE_URL}/reports/appointment/${appointmentId}`, {
+    const response = await fetch(`${API_BASE_URL}/api/reports/appointment/${appointmentId}`, {
       headers: getHeaders(),
       credentials: 'include',
     });
@@ -277,7 +277,7 @@ export const reportsAPI = {
 
   // Get report by ID
   getById: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/reports/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/reports/${id}`, {
       headers: getHeaders(),
       credentials: 'include',
     });
@@ -286,7 +286,7 @@ export const reportsAPI = {
 
   // Create new report
   create: async (reportData) => {
-    const response = await fetch(`${API_BASE_URL}/reports`, {
+    const response = await fetch(`${API_BASE_URL}/api/reports`, {
       method: 'POST',
       headers: getHeaders(),
       credentials: 'include',
@@ -297,7 +297,7 @@ export const reportsAPI = {
 
   // Update report
   update: async (id, reportData) => {
-    const response = await fetch(`${API_BASE_URL}/reports/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/reports/${id}`, {
       method: 'PUT',
       headers: getHeaders(),
       credentials: 'include',
@@ -308,7 +308,7 @@ export const reportsAPI = {
 
   // Update or create report by appointment ID
   upsertByAppointmentId: async (appointmentId, reportData) => {
-    const response = await fetch(`${API_BASE_URL}/reports/appointment/${appointmentId}`, {
+    const response = await fetch(`${API_BASE_URL}/api/reports/appointment/${appointmentId}`, {
       method: 'PUT',
       headers: getHeaders(),
       credentials: 'include',
@@ -319,7 +319,7 @@ export const reportsAPI = {
 
   // Delete report
   delete: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/reports/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/reports/${id}`, {
       method: 'DELETE',
       headers: getHeaders(),
       credentials: 'include',
