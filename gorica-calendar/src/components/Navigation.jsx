@@ -3,6 +3,7 @@ import { addDays, subDays, addWeeks, subWeeks, addMonths, subMonths } from 'date
 import { formatDateDisplay, formatDate, formatDateInput, parseDateInput } from '../utils/timeSlots';
 import { useTranslation } from '../i18n/translations';
 import { useState, useEffect, useRef } from 'react';
+import ShiftToggle from './ShiftToggle';
 
 export default function Navigation() {
   const { currentView, setCurrentView, currentDate, setCurrentDate, goToToday, setGlobalSearchQuery } = useAppStore();
@@ -43,6 +44,10 @@ export default function Navigation() {
         {/* Top row: Date navigation */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
           <div className="flex items-center gap-2 sm:gap-4 flex-1">
+            {/* ShiftToggle - mobile only, shown in this row */}
+            <div className="sm:hidden">
+              <ShiftToggle />
+            </div>
             <button
               onClick={goToToday}
               className="btn-secondary text-xs sm:text-sm px-3 py-2 whitespace-nowrap"
