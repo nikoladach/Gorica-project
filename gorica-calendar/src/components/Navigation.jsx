@@ -1,17 +1,17 @@
 import { useAppStore } from '../store/useAppStore';
 import { addDays, subDays, addWeeks, subWeeks, addMonths, subMonths } from 'date-fns';
-import { formatDateDisplay, formatDateInput, parseDateInput } from '../utils/timeSlots';
+import { formatDateDisplay, formatDate } from '../utils/timeSlots';
 import { useTranslation } from '../i18n/translations';
 import { useState, useEffect } from 'react';
 
 export default function Navigation() {
   const { currentView, setCurrentView, currentDate, setCurrentDate, goToToday } = useAppStore();
   const { t } = useTranslation();
-  const [dateInputValue, setDateInputValue] = useState(formatDateInput(currentDate));
+  const [dateInputValue, setDateInputValue] = useState(formatDate(currentDate));
 
   // Sync input value when currentDate changes from outside (e.g., "Today" button)
   useEffect(() => {
-    setDateInputValue(formatDateInput(currentDate));
+    setDateInputValue(formatDate(currentDate));
   }, [currentDate]);
 
   const navigateDate = (direction) => {
@@ -30,7 +30,7 @@ export default function Navigation() {
         newDate = currentDate;
     }
     setCurrentDate(newDate);
-    setDateInputValue(formatDateInput(newDate));
+    setDateInputValue(formatDate(newDate));
   };
 
   return (
@@ -67,35 +67,21 @@ export default function Navigation() {
                 ←
               </button>
               <input
-                type="text"
+                type="date"
                 value={dateInputValue}
-                placeholder="ДД/ММ/ГГГГ"
                 onChange={(e) => {
                   const inputValue = e.target.value;
                   setDateInputValue(inputValue);
                   
-                  // Try to parse the date
-                  const parsedDate = parseDateInput(inputValue);
-                  if (parsedDate) {
-                    setCurrentDate(parsedDate);
+                  // Date input returns YYYY-MM-DD format, parse it directly
+                  if (inputValue) {
+                    const parsedDate = new Date(inputValue);
+                    if (!isNaN(parsedDate.getTime())) {
+                      setCurrentDate(parsedDate);
+                    }
                   }
                 }}
-                onBlur={(e) => {
-                  // On blur, if the input is invalid, reset to current date format
-                  const parsedDate = parseDateInput(e.target.value);
-                  if (!parsedDate && e.target.value) {
-                    // Invalid date, reset to current date
-                    setDateInputValue(formatDateInput(currentDate));
-                  } else if (!e.target.value) {
-                    // Empty input, set to current date
-                    setDateInputValue(formatDateInput(currentDate));
-                  }
-                }}
-                onFocus={(e) => {
-                  // Select all text on focus for easy editing
-                  e.target.select();
-                }}
-                className="px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent w-24 sm:w-32 text-sm"
+                className="px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent w-32 sm:w-40 text-sm"
               />
               <button
                 onClick={() => navigateDate('next')}
