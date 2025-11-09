@@ -5,16 +5,21 @@ import { format } from 'date-fns';
 import { getAppointmentTypeValues, getAppointmentTypeLabel } from '../utils/appointmentTypes';
 import { useTranslation } from '../i18n/translations';
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, setIsOpen }) {
   const { appointments, currentDate, selectedMode } = useAppStore();
   const { t } = useTranslation();
-  // Sidebar should be closed by default on mobile, open on desktop
-  const [isOpen, setIsOpen] = useState(() => {
+  
+  // If props are not provided, use internal state (for backward compatibility)
+  const [internalIsOpen, setInternalIsOpen] = useState(() => {
     if (typeof window !== 'undefined') {
       return window.innerWidth >= 768; // md breakpoint
     }
     return false;
   });
+  
+  // Use props if provided, otherwise use internal state
+  const sidebarIsOpen = isOpen !== undefined ? isOpen : internalIsOpen;
+  const setSidebarIsOpen = setIsOpen || setInternalIsOpen;
   const [filterType, setFilterType] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -40,39 +45,32 @@ export default function Sidebar() {
   const appointmentTypeValues = getAppointmentTypeValues(selectedMode || 'doctor');
   const appointmentTypes = ['all', ...appointmentTypeValues];
 
-  // Update sidebar state when window is resized
+  // Update sidebar state when window is resized (only if using internal state)
   useEffect(() => {
+    if (setIsOpen) return; // Don't handle resize if controlled by parent
+    
     const handleResize = () => {
       if (window.innerWidth >= 768) {
-        setIsOpen(true); // Open on desktop
+        setInternalIsOpen(true); // Open on desktop
       } else {
-        setIsOpen(false); // Closed on mobile
+        setInternalIsOpen(false); // Closed on mobile
       }
     };
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [setIsOpen]);
 
   return (
     <>
-      {/* Mobile toggle button - sticky to top, below modals */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="md:hidden fixed top-4 right-4 z-30 bg-primary text-white p-2 rounded-lg shadow-lg hover:bg-primary-dark transition-colors"
-        aria-label={isOpen ? t('common.close') : t('sidebar.openSidebar')}
-      >
-        {isOpen ? '✕' : '☰'}
-      </button>
-
       {/* Sidebar */}
       <div
         className={`
           fixed md:static inset-y-0 right-0 z-40
           w-full sm:w-80 bg-white shadow-lg border-l border-gray-200
           transform transition-transform duration-300 ease-in-out
-          ${isOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}
-          pt-16 sm:pt-16 md:pt-4
+          ${sidebarIsOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}
+          pt-4 md:pt-4
         `}
       >
         <div className="p-3 sm:p-4 h-full overflow-y-auto">
@@ -95,7 +93,7 @@ export default function Sidebar() {
               </div>
               {/* Close button - visible on mobile when sidebar is open */}
               <button
-                onClick={() => setIsOpen(false)}
+                onClick={() => setSidebarIsOpen(false)}
                 className="md:hidden flex-shrink-0 text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors"
                 aria-label={t('common.close')}
               >
@@ -190,10 +188,10 @@ export default function Sidebar() {
       </div>
 
       {/* Overlay for mobile - below modals */}
-      {isOpen && (
+      {sidebarIsOpen && (
         <div
           className="md:hidden fixed inset-0 bg-black/50 z-20"
-          onClick={() => setIsOpen(false)}
+          onClick={() => setSidebarIsOpen(false)}
         />
       )}
     </>
