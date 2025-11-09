@@ -25,6 +25,21 @@ export default function PhysicianReport({ isOpen, onClose, appointment }) {
   const [followUpInstructions, setFollowUpInstructions] = useState('');
   const [additionalNotes, setAdditionalNotes] = useState('');
 
+  // Prevent body scrolling when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      // Save the current overflow style
+      const originalOverflow = document.body.style.overflow;
+      // Disable scrolling
+      document.body.style.overflow = 'hidden';
+      
+      // Cleanup: restore scrolling when modal closes
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isOpen]);
+
   useEffect(() => {
     if (isOpen && appointment) {
       // Pre-fill with appointment data
