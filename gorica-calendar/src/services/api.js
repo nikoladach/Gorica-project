@@ -255,7 +255,7 @@ export const reportsAPI = {
     if (filters.start_date) params.append('start_date', filters.start_date);
     if (filters.end_date) params.append('end_date', filters.end_date);
 
-    const url = `${API_BASE_URL}/reports${params.toString() ? '?' + params.toString() : ''}`;
+const url = `${API_BASE_URL}/api/reports${params.toString() ? '?' + params.toString() : ''}`;
     console.log('Fetching reports from:', url);
     const response = await fetch(url, {
       headers: getHeaders(),
