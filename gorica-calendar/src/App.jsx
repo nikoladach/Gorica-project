@@ -30,6 +30,13 @@ function App() {
   const { t } = useTranslation();
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [isPatientReportsOpen, setIsPatientReportsOpen] = useState(false);
+  // Sidebar state - closed by default on mobile, open on desktop
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 768; // md breakpoint
+    }
+    return false;
+  });
 
   // Verify authentication on mount
   useEffect(() => {
@@ -44,6 +51,20 @@ function App() {
       });
     }
   }, [fetchAppointments, isAuthenticated]);
+
+  // Update sidebar state when window is resized
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setSidebarOpen(true); // Open on desktop
+      } else {
+        setSidebarOpen(false); // Closed on mobile
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const renderCalendar = () => {
     switch (currentView) {
@@ -246,6 +267,14 @@ function App() {
 
             {/* Right: Controls */}
             <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+              {/* Hamburger menu button - mobile only */}
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="md:hidden bg-primary text-white p-2 rounded-lg shadow-sm hover:bg-primary-dark transition-colors flex-shrink-0"
+                aria-label={sidebarOpen ? t('common.close') : t('sidebar.openSidebar')}
+              >
+                {sidebarOpen ? '✕' : '☰'}
+              </button>
               <ShiftToggle />
               <button
                 onClick={logout}
@@ -322,7 +351,7 @@ function App() {
             </div>
 
             {/* Sidebar */}
-            <Sidebar />
+            <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
           </>
         )}
       </div>
