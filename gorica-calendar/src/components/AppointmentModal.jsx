@@ -33,6 +33,21 @@ export default function AppointmentModal({ isOpen, onClose, selectedSlot, appoin
     setError('');
   }, [appointment, isOpen]);
 
+  // Prevent body scrolling when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      // Save the current overflow style
+      const originalOverflow = document.body.style.overflow;
+      // Disable scrolling
+      document.body.style.overflow = 'hidden';
+      
+      // Cleanup: restore scrolling when modal closes
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isOpen]);
+
   if (!isOpen || !selectedSlot) return null;
 
   const handleSubmit = async (e) => {
