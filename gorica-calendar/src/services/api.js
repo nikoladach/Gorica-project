@@ -476,7 +476,7 @@ export const dataTransformers = {
     const minutes = date.getMinutes();
     
     // Calculate end time (15 minutes after start) using local time
-    const endMinutes = minutes + 15;
+    const endMinutes = minutes + 30;
     const endHours = hours + Math.floor(endMinutes / 60);
     const finalEndMinutes = endMinutes % 60;
     
