@@ -16,7 +16,7 @@ export const generateTimeSlots = (date, shift) => {
   
   while (currentTime < endTime) {
     slots.push(new Date(currentTime));
-    currentTime = addMinutes(currentTime, 15);
+    currentTime = addMinutes(currentTime, 30);
   }
   
   return slots;
@@ -165,4 +165,5 @@ export const isSameTimeSlot = (date1, date2) => {
   return formatTime(validDate1) === formatTime(validDate2) && 
          formatDate(validDate1) === formatDate(validDate2);
 };
+
 
