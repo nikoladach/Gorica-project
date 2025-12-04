@@ -4,10 +4,9 @@ import { getTranslation } from '../i18n/translations';
 export const appointmentTypes = {
   doctor: [
     { value: 'consultation', labelKey: 'appointmentTypes.consultation' },
-    { value: 'follow-up', labelKey: 'appointmentTypes.follow-up' },
-    { value: 'checkup', labelKey: 'appointmentTypes.checkup' },
-    { value: 'procedure', labelKey: 'appointmentTypes.procedure' },
-    { value: 'emergency', labelKey: 'appointmentTypes.emergency' },
+    { value: 'moj-termin', labelKey: 'appointmentTypes.moj-termin'},
+    { value: 'private-checkup', labelKey: 'appointmentTypes.private-checkup' },
+    { value: 'intervention', labelKey: 'appointmentTypes.intervention' },
   ],
   esthetician: [
     { value: 'facial', labelKey: 'appointmentTypes.facial' },
