@@ -163,6 +163,9 @@ export const translations = {
       checkup: 'Преглед',
       procedure: 'Процедура',
       emergency: 'Итно',
+      'moj-termin': 'Мој термин',
+      'private-checkup': 'Приватен преглед',
+      intervention: 'Интервенција',
 
       // Esthetician types
       facial: 'Фацијална третман',
